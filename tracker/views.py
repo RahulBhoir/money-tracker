@@ -1,8 +1,11 @@
 from django.http import HttpResponse
+from django.contrib.auth import get_user_model
+
+from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from .models import *
@@ -10,6 +13,8 @@ from .serializers import *
 from .utils import get_total_remaining_amount
 
 from datetime import date, datetime
+
+User = get_user_model()
 
 # Create your views here.
 
@@ -47,8 +52,38 @@ class IncomeViewset(ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SpendViewset:
-    pass
+class SpendViewset(APIView):
+    queryset = DailySpend.objects.all()
+    serializer_class = DailySpendSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        data = request.query_params
+        month = data.get('month', datetime.now().month)
+        self.queryset = self.queryset.filter(user=user, date__month=month)
+        serializers = DailySpendSerializer(self.queryset, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        data = request.data
+        spend_data = {
+            'user': user.id,
+            'name': data.get('name', ''),
+            'amount': data.get('amount', 0),
+            'category': data.get('category', 1),
+            'tag': data.get('tag', 1),
+            'spend_type': data.get('spend_type', 1),
+            'date': data.get('date', date.today()),
+            'time': data.get('time', datetime.now().time())
+        }
+
+        serializer = DailySpendSerializer(data=spend_data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TagsViewset(ListAPIView):

@@ -56,23 +56,12 @@ class DailySpend(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        display_name = str(self.user.id) + self.name
+        display_name = f'{self.id} {str(self.user.id)} {self.name}'
         return display_name
-
-    def save(self):
-        if not self.date:
-            self.date = datetime.now().date()
-        if not self.time:
-            self.time = datetime.now().time()
-        if not self.tag:
-            self.tag = Tag.objects.get(id=1)
-        if not self.spend_type:
-            self.spend_type = SpendType.objects.get(id=1)
-        if not self.category:
-            self.category = Category.objects.get(id=1)
 
 
 class Income(models.Model):
+    name = models.CharField(max_length=256, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(default=0, blank=False, null=False)
     total_remaining_amt = models.IntegerField(default=0,
