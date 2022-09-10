@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
-import datetime
+from datetime import datetime
+
 
 # Create your models here.
 class SpendType(models.Model):
@@ -44,7 +45,8 @@ class Tag(models.Model):
 class DailySpend(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
     category = models.ForeignKey(Category, on_delete=models.RESTRICT)
-    amount = models.FloatField(default=0.0, max_length=10, blank=False, null=False)
+    amount = models.FloatField(default=0.0,
+                               max_length=10, blank=False, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(blank=False, null=False, verbose_name="spend_date")
     time = models.TimeField(blank=False, null=False, verbose_name="spend_time")
@@ -59,9 +61,9 @@ class DailySpend(models.Model):
 
     def save(self):
         if not self.date:
-            self.date = datetime.datetime.now().date()
+            self.date = datetime.now().date()
         if not self.time:
-            self.time = datetime.datetime.now().time()
+            self.time = datetime.now().time()
         if not self.tag:
             self.tag = Tag.objects.get(id=1)
         if not self.spend_type:
@@ -73,8 +75,13 @@ class DailySpend(models.Model):
 class Income(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(default=0, blank=False, null=False)
-    total_remaining_amt = models.IntegerField(default=0, blank=False, null=False)
+    total_remaining_amt = models.IntegerField(default=0,
+                                              blank=False, null=False)
     category = models.ForeignKey(Category, on_delete=models.RESTRICT)
+    date = models.DateField(default=datetime.now().date(),
+                            blank=False, null=False, verbose_name="income_date",)
+    time = models.TimeField(default=datetime.now().time(),
+                            blank=False, null=False, verbose_name="income_time",)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -92,10 +99,3 @@ class Income(models.Model):
         else:
             split_dic = {"error": "Salary is zero"}
         return split_dic
-
-    def get_total_remaining_amount(self):
-        if not self.id:
-            self.total_remaining_amt = self.amount - self.total_remaining_amt
-            return self.total_remaining_amt
-        else:
-            total_spend = DailySpend.objects.filter(user=self.user)
