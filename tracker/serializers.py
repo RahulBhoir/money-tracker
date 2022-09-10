@@ -15,7 +15,9 @@ class DailySpendSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DailySpend
-        fields = "__all__"
+        fields = [
+            "user", "name", "amount", "category", "date", "time", "tag", "spend_type"
+        ]
 
 
 class TagSerializer(serializers.ModelSerializer):
