@@ -85,6 +85,12 @@ class SpendViewset(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, pk, *args, **kwargs):
+        obj = self.queryset.filter(id=pk)
+        obj.delete()
+        msg = f'Object with id {pk} has been deleted'
+        return Response({'msg': msg}, status=status.HTTP_204_NO_CONTENT)
+
 
 class TagsViewset(ListAPIView):
     queryset = Tag.objects.all()

@@ -12,4 +12,5 @@ urlpatterns = [
     path("category_list", CategoryViewset.as_view(), name="category_list"),
     path("spendtype_list", SpendTypeViewset.as_view(), name="spend_type_list"),
     path("api/spend", SpendViewset.as_view(), name="daily_spend"),
+    path("api/spend/<int:pk>/", SpendViewset.as_view(), name="daily_spend"),
 ]
